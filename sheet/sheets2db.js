@@ -8,7 +8,7 @@ table = range.getValues();
 let jsonData = arrayToJSONObject(table.slice(1, table.length));
 let numRows = 20;
 const url =
-  "https://zm2g3frw2j.execute-api.ap-south-1.amazonaws.com/test/sheets2db";
+  "https://atrc57cheh.execute-api.ap-south-1.amazonaws.com/staging/db-subscriber-user";
 
 // main logic
 function main(rowCount) {
