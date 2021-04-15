@@ -7,6 +7,7 @@ let range = sheet.getDataRange();
 table = range.getValues();
 let jsonData = arrayToJSONObject(table.slice(1, table.length));
 let numRows = 20;
+const url = "https://location-api.enrootmumbai.in/health-check";
 
 // main logic
 function main(rowCount) {
@@ -16,7 +17,7 @@ function main(rowCount) {
       let res = post(newData[i]);
       if (res.status) {
         setData(newData[i].rowNum, "Correct Status", res.status);
-        setData(newData[i].rowNum, "MacApp Comment", "updated");
+        setData(newData[i].rowNum, "MacApp Comment", res.status);
       }
     }
   }
@@ -29,9 +30,7 @@ function handleInput(data) {
 
 // invoke lambda
 function post(body) {
-  let res = UrlFetchApp.fetch(
-    "https://location-api.enrootmumbai.in/health-check"
-  );
+  let res = UrlFetchApp.fetch(url, { method: "post", payload: body });
   return JSON.parse(res.getContentText());
 }
 
@@ -42,6 +41,10 @@ function getFilteredRows(numOfRows) {
   for (var i = 0; i < jsonData.length; i++) {
     if (count === numOfRows) break;
     if (getByName("MacApp Comment", i + 1) != "updated") {
+      if (getByName("amount", i + 1) === 0) {
+        setData(i + 1, "Correct Status", "data incorrect");
+        continue;
+      }
       jsonData[i].rowNum = i + 1;
       newArr.push(jsonData[i]);
       count++;
