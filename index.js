@@ -26,7 +26,7 @@ exports.handler = async (req) => {
         // verify if a user subscription exists, if not, return status= "no login"
         // if curdate => last end date =>> new start_date=curdate & end_date = curdate+months_or_days [1]
         // if curdate < last_end_date =>> new start date= curdate & end_date = last end_date+months_or_days [2]
-        let subscribedPrograms = db.query(
+        let subscribedPrograms = await db.query(
           "select * from programUserSubscription where user_token = ? and end_date_time > CURDATE() order by id desc limit 1",
           [user[0].user_token]
         );
