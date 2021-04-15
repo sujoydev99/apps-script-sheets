@@ -7,7 +7,8 @@ let range = sheet.getDataRange();
 table = range.getValues();
 let jsonData = arrayToJSONObject(table.slice(1, table.length));
 let numRows = 20;
-const url = "https://location-api.enrootmumbai.in/health-check";
+const url =
+  "https://zm2g3frw2j.execute-api.ap-south-1.amazonaws.com/test/sheets2db";
 
 // main logic
 function main(rowCount) {
@@ -18,6 +19,8 @@ function main(rowCount) {
       if (res.status) {
         setData(newData[i].rowNum, "Correct Status", res.status);
         setData(newData[i].rowNum, "MacApp Comment", res.status);
+        if (res.id)
+          setData(newData[i].rowNum, "programUserSubscription - ID", res.id);
       }
     }
   }

@@ -71,6 +71,7 @@ exports.handler = async (req) => {
       };
     }
   } catch (error) {
+    console.log(error);
     return {
       message: "An error occured!",
     };

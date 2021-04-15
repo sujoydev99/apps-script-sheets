@@ -1,0 +1,22 @@
+{
+  "name": "apps-script-sheets",
+  "version": "1.0.0",
+  "description": "apps script for G-sheets proccess automation",
+  "main": "sheets2db.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sujoydev99/apps-script-sheets.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sujoydev99/apps-script-sheets/issues"
+  },
+  "homepage": "https://github.com/sujoydev99/apps-script-sheets#readme",
+  "dependencies": {
+    "mysql": "^2.18.1"
+  }
+}
