@@ -6,4 +6,4 @@ apps script for G-sheets proccess automation
 
 - zip -r code.zip .
 - setup aws cli and login
-- aws lambda update-function-code --function-name sheets2db --zip-file fileb://code.zip
+- aws lambda update-function-code --function-name db-subscriber-insert --zip-file fileb://code.zip
