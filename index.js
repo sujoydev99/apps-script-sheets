@@ -6,11 +6,11 @@ const config = {
   database: process.env.DATABASE,
 };
 
-exports.handler = async (req) => {
+exports.handler = async (event, context, callback) => {
   try {
     let db = new Database(config);
     let body = null;
-    if (req.body) body = JSON.parse(req.body);
+    if (event.body) body = JSON.parse(event.body);
     // verify if user exists, if not, return status= "no login"
     let user = await db.query(
       "SELECT * from user where email like ? or mobile_number like ?",
@@ -30,7 +30,7 @@ exports.handler = async (req) => {
           "select * from programUserSubscription where user_token = ? and end_date_time > CURDATE() order by id desc limit 1",
           [user[0].user_token]
         );
-        let startDate,
+        let startDate = new Date(),
           endDate = new Date(); // [2]
         // if an ongoing subscription exists then set end_date_time for the new subscription= ongoing_enddate + new_subscription_period
         if (subscribedPrograms.length > 0) {
@@ -46,58 +46,77 @@ exports.handler = async (req) => {
 
         // on successful insertion return status= "updated"
         let userSubscription = await db.query(
-          "insert into programUserSubscription(user_token, subscription_id, amount, order_id, device, status, type, start_date_time, end_date_time, razorpay_payment_id, razorpay_order_id, invoice_number, coupon_id, payment_type,subscription_order_id, percentage, total_amount,discount_amount, gst, duration,razorpay_reference,razorpay_signature, lattitude, longitude, state, city, address) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          "insert into programUserSubscription(user_token, invoice_number, subscription_id, coupon_id, order_id, payment_type, device, subscription_order_id, percentage, total_amount, discount_amount, amount, gst, duration, status, start_date_time, end_date_time, type, show_status, razorpay_reference, address, razorpay_signature, razorpay_payment_id, razorpay_order_id) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
           [
             user[0].user_token,
+            "",
             subscription[0].id,
-            parseInt(body.amount),
+            0,
             body["Order ID"],
+            1,
             "web",
+            "",
+            0,
+            0,
+            0,
+            parseInt(body.amount),
+            0,
+            subscription[0].period,
             "success",
-            body.amount === 0 ? "free" : "paid",
             startDate,
             endDate,
-            body["payment page id"],
-            body["Order ID"],
-            "",
-            0,
+            body.amount === 0 ? "free" : "paid",
             1,
             "",
-            0,
-            0,
-            0,
-            0,
-            body.period,
             "",
             "",
-            "",
-            "",
-            "",
-            "",
-            "",
+            body["payment page id"],
+            body["Order ID"],
           ]
         );
-        return {
-          status: "updated",
-          id: userSubscription.insertId,
-        };
+        REST_response(
+          {
+            status: "updated",
+            id: userSubscription.insertId,
+          },
+          callback
+        );
       } else {
-        return {
-          status: "no plan",
-        };
+        REST_response(
+          {
+            status: "no plan",
+          },
+          callback
+        );
       }
     } else {
-      return {
-        status: "no login",
-      };
+      REST_response(
+        {
+          status: "no login",
+        },
+        callback
+      );
     }
   } catch (error) {
     console.log(error);
-    return {
-      message: "An error occured!",
-    };
+    REST_response(
+      {
+        message: "An error occured!",
+      },
+      callback
+    );
   }
 };
+
+function REST_response(res, callback) {
+  var response = {
+    statusCode: 200,
+    headers: {},
+    body: JSON.stringify(res),
+    isBase64Encoded: false,
+  };
+  callback(null, response);
+}
 
 class Database {
   constructor(config) {
