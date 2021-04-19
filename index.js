@@ -1,16 +1,16 @@
-const mysql = require("mysql");
-const config = {
-  host: process.env.HOST,
-  user: process.env.USER,
-  password: process.env.PASSWORD,
-  database: process.env.DATABASE,
-};
+var mysql = require("mysql");
 
 exports.handler = async (event, context, callback) => {
   try {
-    let db = new Database(config);
+    var db = new Database({
+      host: process.env.HOST,
+      user: process.env.USER,
+      password: process.env.PASSWORD,
+      database: process.env.DATABASE,
+    });
+
     let body = null;
-    if (event.body) body = JSON.parse(event.body);
+    if (event) body = event;
     // verify if user exists, if not, return status= "no login"
     let user = await db.query(
       "SELECT * from user where email like ? or mobile_number like ?",
@@ -74,6 +74,7 @@ exports.handler = async (event, context, callback) => {
             body["Order ID"],
           ]
         );
+        db.close();
         REST_response(
           {
             status: "updated",
@@ -82,6 +83,7 @@ exports.handler = async (event, context, callback) => {
           callback
         );
       } else {
+        db.close();
         REST_response(
           {
             status: "no plan",
@@ -90,6 +92,7 @@ exports.handler = async (event, context, callback) => {
         );
       }
     } else {
+      db.close();
       REST_response(
         {
           status: "no login",
@@ -98,25 +101,16 @@ exports.handler = async (event, context, callback) => {
       );
     }
   } catch (error) {
-    console.log(error);
+    db.close();
     REST_response(
       {
         message: "An error occured!",
+        error: error,
       },
       callback
     );
   }
 };
-
-function REST_response(res, callback) {
-  var response = {
-    statusCode: 200,
-    headers: {},
-    body: JSON.stringify(res),
-    isBase64Encoded: false,
-  };
-  callback(null, response);
-}
 
 class Database {
   constructor(config) {
@@ -138,4 +132,14 @@ class Database {
       });
     });
   }
+}
+
+function REST_response(res, callback) {
+  var response = {
+    statusCode: 200,
+    headers: {},
+    body: res,
+    isBase64Encoded: false,
+  };
+  callback(null, response);
 }
