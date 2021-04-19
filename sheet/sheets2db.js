@@ -8,7 +8,7 @@ table = range.getValues();
 let jsonData = arrayToJSONObject(table.slice(1, table.length));
 let numRows = 20;
 const url =
-  "https://atrc57cheh.execute-api.ap-south-1.amazonaws.com/staging/db-subscriber-user";
+  "https://kq8ot2bvth.execute-api.ap-south-1.amazonaws.com/test-stage";
 
 // main logic
 function main(rowCount) {
@@ -16,24 +16,28 @@ function main(rowCount) {
   for (let i = 0; i < newData.length; i++) {
     if ((newData[i].email != "") & (newData[i].phone != "")) {
       let res = post(newData[i]);
-      if (res.status) {
-        setData(newData[i].rowNum, "Correct Status", res.status);
-        setData(newData[i].rowNum, "MacApp Comment", res.status);
-        if (res.id)
-          setData(newData[i].rowNum, "programUserSubscription - ID", res.id);
+      console.log(res);
+      if (res.body.status) {
+        setData(newData[i].rowNum, "Correct Status", res.body.status);
+        setData(newData[i].rowNum, "MacApp Comment", res.body.status);
+        if (res.body.id)
+          setData(
+            newData[i].rowNum,
+            "programUserSubscription - ID",
+            res.body.id
+          );
       }
     }
   }
 }
 
-// set num of rows
-function handleInput(data) {
-  Logger.log(data);
-}
-
 // invoke lambda
 function post(body) {
-  let res = UrlFetchApp.fetch(url, { method: "post", payload: body });
+  let res = UrlFetchApp.fetch(url, {
+    method: "post",
+    payload: JSON.stringify(body),
+    contentType: "application/json",
+  });
   return JSON.parse(res.getContentText());
 }
 
@@ -43,7 +47,7 @@ function getFilteredRows(numOfRows) {
   let newArr = [];
   for (var i = 0; i < jsonData.length; i++) {
     if (count === numOfRows) break;
-    if (getByName("MacApp Comment", i + 1) != "updated") {
+    if (getByName("MacApp Comment", i + 1) == "") {
       if (getByName("amount", i + 1) === 0) {
         setData(i + 1, "Correct Status", "data incorrect");
         continue;
